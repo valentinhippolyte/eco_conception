@@ -7,10 +7,12 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\HttpFoundation\File\File;
+use ORM\PrePersist;
 
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
 #[Vich\Uploadable]
+#[ORM\HasLifecycleCallbacks]
 class Game
 {
     #[ORM\Id]
@@ -34,8 +36,8 @@ class Game
     #[ORM\Column(nullable: true)]
     private ?int $imageSize = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $createdAt = null;
 
     public function getId(): ?int
     {
@@ -78,12 +80,6 @@ class Game
     public function setImageFile(?File $imageFile = null): void
     {
         $this->imageFile = $imageFile;
-
-        if (null !== $imageFile) {
-            // It is required that at least one field changes if you are using doctrine
-            // otherwise the event listeners won't be called and the file is lost
-            $this->updatedAt = new \DateTimeImmutable();
-        }
     }
 
 
@@ -110,5 +106,11 @@ class Game
     public function getImageSize(): ?int
     {
         return $this->imageSize;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = time();
     }
 }
