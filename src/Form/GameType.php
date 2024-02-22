@@ -17,7 +17,7 @@ class GameType extends AbstractType
             ->add('description')
             ->add('imageFile', FileType::class, [
                 'label' => 'Upload Image',
-                'required' => false, // Vous pouvez définir cette option selon vos besoins
+                'required' => false,
             ]);
     }
 
