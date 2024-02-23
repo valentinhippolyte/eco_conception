@@ -10,6 +10,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Imagine\Image\Box;
+use Imagine\Gd\Imagine;
 
 #[Route('/game', name: 'app_game')]
 class GameController extends AbstractController
@@ -43,5 +45,25 @@ class GameController extends AbstractController
             'game' => $game,
             'form' => $form,
         ]);
+    }
+
+    public function compressImage($file, $name)
+    {
+        $imagine = new Imagine();
+        $image = $imagine->open($file->getPathname());
+
+        $size = $image->getSize();
+        $ratio = $size->getWidth() / $size->getHeight();
+        $newHeight = 720;
+        $newWidth = $newHeight * $ratio;
+
+        $image->resize(new Box($newWidth, $newHeight));
+
+        $uploadsDir = $this->getParameter('uploads_directory');
+        $newFilename = $name . '.' . $file->guessExtension();
+
+        $image->save($uploadsDir . '/' . $newFilename);
+
+        return $newFilename;
     }
 }

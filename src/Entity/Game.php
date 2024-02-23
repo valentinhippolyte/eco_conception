@@ -8,6 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\HttpFoundation\File\File;
 use ORM\PrePersist;
+use Imagine\Image\Box;
+use Imagine\Gd\Imagine;
 
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
@@ -112,5 +114,28 @@ class Game
     public function setCreatedAtValue(): void
     {
         $this->createdAt = time();
+    }
+
+    public function compressImage($file, $name)
+    {
+        $imagine = new Imagine();
+        $image = $imagine->open($file->getPathname());
+
+        // Redimensionnez l'image à 720p
+        $size = $image->getSize();
+        $ratio = $size->getWidth() / $size->getHeight();
+        $newHeight = 720;
+        $newWidth = $newHeight * $ratio;
+
+        $image->resize(new Box($newWidth, $newHeight));
+
+        // Définir le chemin de sauvegarde
+        $uploadsDir = $this->getParameter('uploads_directory');
+        $newFilename = $name . '.' . $file->guessExtension();
+
+        // Sauvegarder l'image
+        $image->save($uploadsDir . '/' . $newFilename);
+
+        return $newFilename;
     }
 }
